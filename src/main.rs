@@ -1,8 +1,9 @@
 use indicatif::ProgressBar;
 use std::env;
 use std::fs::File;
+use std::io::Write;
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         eprintln!("Usage: {} <filename>", &args[0]);
@@ -11,13 +12,14 @@ fn main() {
 
     let file_name = &args[1];
     println!("{}", file_name);
+    let mut file = File::create(file_name)?;
 
     const RGB_SCALER: f64 = 255.999;
     let image_width: i16 = 256;
     let image_height: i16 = 256;
     let bar = ProgressBar::new((image_height - 1 as i16) as u64);
 
-    println!("P3\n{image_width} {image_height}\n255\n");
+    file.write_all(format!("P3\n{} {}\n255\n", image_width, image_height).as_bytes())?;
 
     for j in 0..image_height {
         bar.inc(1);
@@ -30,7 +32,9 @@ fn main() {
             let ig = RGB_SCALER * g as f64;
             let ib = RGB_SCALER * b as f64;
 
-            println!("{ir} {ig} {ib}");
+            file.write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())?;
         }
     }
+
+    Ok(())
 }
