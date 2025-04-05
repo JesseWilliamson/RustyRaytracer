@@ -5,10 +5,7 @@ use std::fs::File;
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        eprintln!(
-            "Usage: {} <filename> <image_width> <image_height>",
-            &args[0]
-        );
+        eprintln!("Usage: {} <filename>", &args[0]);
         std::process::exit(1);
     }
 
