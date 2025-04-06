@@ -57,6 +57,22 @@ mod tests {
             z: 1.0,
         };
 
-        println!("{:?}", a + b);
+        assert_eq!(
+            a + b,
+            vectors::Vec3 {
+                x: 1.0,
+                y: 4.0,
+                z: 1.0,
+            }
+        );
+        assert_eq!(
+            a - b,
+            vectors::Vec3 {
+                x: -1.0,
+                y: 2.0,
+                z: -1.0,
+            }
+        );
+        assert_eq!(b.length_squared(), 3.0)
     }
 }
