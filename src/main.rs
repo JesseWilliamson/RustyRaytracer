@@ -2,6 +2,7 @@ use indicatif::ProgressBar;
 use std::env;
 use std::fs::File;
 use std::io::Write;
+mod vectors;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -37,4 +38,25 @@ fn main() -> std::io::Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::vectors;
+    #[test]
+    fn vectors() {
+        let a: vectors::Vec3 = vectors::Vec3 {
+            x: 0.0,
+            y: 3.0,
+            z: 0.0,
+        };
+
+        let b: vectors::Vec3 = vectors::Vec3 {
+            x: 1.0,
+            y: 1.0,
+            z: 1.0,
+        };
+
+        println!("{:?}", a + b);
+    }
 }
