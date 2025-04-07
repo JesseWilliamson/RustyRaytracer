@@ -45,34 +45,13 @@ mod tests {
     use super::vectors;
     #[test]
     fn vectors() {
-        let a: vectors::Vec3 = vectors::Vec3 {
-            x: 0.0,
-            y: 3.0,
-            z: 0.0,
-        };
-
-        let b: vectors::Vec3 = vectors::Vec3 {
-            x: 1.0,
-            y: 1.0,
-            z: 1.0,
-        };
-
-        assert_eq!(
-            a + b,
-            vectors::Vec3 {
-                x: 1.0,
-                y: 4.0,
-                z: 1.0,
-            }
-        );
-        assert_eq!(
-            a - b,
-            vectors::Vec3 {
-                x: -1.0,
-                y: 2.0,
-                z: -1.0,
-            }
-        );
-        assert_eq!(b.length_squared(), 3.0)
+        let a = vectors::Vec3::new(0.0, 3.0, 0.0);
+        let b = vectors::Vec3::new(1.0, 1.0, 1.0);
+        assert_eq!(a + b, vectors::Vec3::new(1.0, 4.0, 1.0));
+        assert_eq!(a - b, vectors::Vec3::new(-1.0, 2.0, -1.0));
+        assert_eq!(b.length_squared(), 3.0);
+        let c = vectors::Color::new(0.9, 0.1, 0.5);
+        let mut stdout = std::io::stdout();
+        c.write_color(&mut stdout).unwrap();
     }
 }
