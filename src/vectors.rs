@@ -7,6 +7,7 @@ pub struct Vec3 {
     z: f64,
 }
 pub type Color = Vec3;
+pub type Point3 = Vec3;
 
 impl Color {
     pub fn write_color<W: Write>(self, out: &mut W) -> Result<(), std::io::Error> {
@@ -46,6 +47,18 @@ impl ops::Sub<Vec3> for Vec3 {
     }
 }
 
+impl ops::Mul<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, _rhs: f64) -> Vec3 {
+        Vec3 {
+            x: self.y * _rhs,
+            y: self.y * _rhs,
+            z: self.y * _rhs,
+        }
+    }
+}
+
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
@@ -65,5 +78,24 @@ impl Vec3 {
 
     pub fn length_squared(self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
+    }
+}
+
+pub struct ray {
+    orig: Point3,
+    dir: Vec3,
+}
+
+impl ray {
+    pub fn orig(&self) -> &Point3 {
+        &self.orig
+    }
+
+    pub fn dir(&self) -> &Vec3 {
+        &self.dir
+    }
+
+    pub fn at(&self, t: f64) -> Point3 {
+        return self.orig + t * self.dir;
     }
 }
