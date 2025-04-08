@@ -15,21 +15,51 @@ fn main() -> std::io::Result<()> {
     println!("{}", file_name);
     let mut file = File::create(file_name)?;
 
-    let image_width: i16 = 256;
-    let image_height: i16 = 256;
-    let bar = ProgressBar::new((image_height - 1 as i16) as u64);
+    // Image
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width: i32 = 400;
+    let image_height: i32 = std::cmp::max(1, (image_width as f64 / aspect_ratio) as i32);
+
+    // Camera
+    let focal_length = 1.0;
+    let viewport_height = 2.0;
+    let viewport_width = viewport_height * image_width as f64 / image_height as f64;
+    let camera_center = vectors::Point3::new(0.0, 0.0, 0.0);
+
+    let viewport_u = vectors::Vec3::new(viewport_width, 0.0, 0.0);
+    let viewport_v = vectors::Vec3::new(0.0, -viewport_height, 0.0);
+
+    let pixel_delta_u = viewport_u / image_width as f64;
+    let pixel_delta_v = viewport_v / image_height as f64;
+
+    let viewport_upper_left = camera_center
+        - vectors::Vec3::new(0.0, 0.0, focal_length)
+        - viewport_u / 2.0
+        - viewport_v / 2.0;
+
+    let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
+
+    let bar = ProgressBar::new((image_height - 1) as u64);
 
     file.write_all(format!("P3\n{} {}\n255\n", image_width, image_height).as_bytes())?;
 
     for j in 0..image_height {
         bar.inc(1);
         for i in 0..image_width {
-            let pixel_color = vectors::Color::new(
-                i as f64 / (image_width - 1) as f64,
-                j as f64 / (image_height - 1) as f64,
-                0.0,
-            );
+            let pixel_center =
+                pixel00_loc + (pixel_delta_u * i as f64) + (pixel_delta_v * j as f64);
+            let ray_direction = pixel_center - camera_center;
+            let r = vectors::ray::new(camera_center, ray_direction);
+
+            let pixel_color = r.color();
             pixel_color.write_color(&mut file)?;
+
+            // let pixel_color = vectors::Color::new(
+            //     i as f64 / (image_width - 1) as f64,
+            //     j as f64 / (image_height - 1) as f64,
+            //     0.0,
+            // );
+            // pixel_color.write_color(&mut file)?;
         }
     }
 

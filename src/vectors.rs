@@ -52,9 +52,21 @@ impl ops::Mul<f64> for Vec3 {
 
     fn mul(self, _rhs: f64) -> Vec3 {
         Vec3 {
-            x: self.y * _rhs,
+            x: self.x * _rhs,
             y: self.y * _rhs,
-            z: self.y * _rhs,
+            z: self.z * _rhs,
+        }
+    }
+}
+
+impl ops::Div<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, _rhs: f64) -> Vec3 {
+        Vec3 {
+            x: self.x / _rhs,
+            y: self.y / _rhs,
+            z: self.z / _rhs,
         }
     }
 }
@@ -87,6 +99,10 @@ pub struct ray {
 }
 
 impl ray {
+    pub fn new(orig: Point3, dir: Vec3) -> Self {
+        ray { orig, dir }
+    }
+
     pub fn orig(&self) -> &Point3 {
         &self.orig
     }
@@ -97,5 +113,9 @@ impl ray {
 
     pub fn at(&self, t: f64) -> Point3 {
         return self.orig + self.dir * t;
+    }
+
+    pub fn color(&self) -> Color {
+        return Color::new(0.0, 0.0, 0.0);
     }
 }
