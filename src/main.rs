@@ -15,7 +15,6 @@ fn main() -> std::io::Result<()> {
     println!("{}", file_name);
     let mut file = File::create(file_name)?;
 
-    const RGB_SCALER: f64 = 255.999;
     let image_width: i16 = 256;
     let image_height: i16 = 256;
     let bar = ProgressBar::new((image_height - 1 as i16) as u64);
@@ -25,15 +24,12 @@ fn main() -> std::io::Result<()> {
     for j in 0..image_height {
         bar.inc(1);
         for i in 0..image_width {
-            let r: f64 = i as f64 / ((image_width - 1) as f64);
-            let g: f64 = j as f64 / ((image_height - 1) as f64);
-            let b: f64 = 0.0;
-
-            let ir = RGB_SCALER * r as f64;
-            let ig = RGB_SCALER * g as f64;
-            let ib = RGB_SCALER * b as f64;
-
-            file.write_all(format!("{} {} {}\n", ir, ig, ib).as_bytes())?;
+            let pixel_color = vectors::Color::new(
+                i as f64 / (image_width - 1) as f64,
+                j as f64 / (image_height - 1) as f64,
+                0.0,
+            );
+            pixel_color.write_color(&mut file)?;
         }
     }
 
