@@ -96,6 +96,6 @@ impl ray {
     }
 
     pub fn at(&self, t: f64) -> Point3 {
-        return self.orig + t * self.dir;
+        return self.orig + self.dir * t;
     }
 }
