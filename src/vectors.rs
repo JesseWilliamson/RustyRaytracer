@@ -71,6 +71,18 @@ impl ops::Div<f64> for Vec3 {
     }
 }
 
+impl ops::Div<f64> for &Vec3 {
+    type Output = Vec3;
+
+    fn div(self, _rhs: f64) -> Vec3 {
+        Vec3 {
+            x: self.x / _rhs,
+            y: self.y / _rhs,
+            z: self.z / _rhs,
+        }
+    }
+}
+
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
@@ -91,6 +103,14 @@ impl Vec3 {
     pub fn length_squared(self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
+
+    pub fn length(self) -> f64 {
+        self.length_squared().sqrt()
+    }
+}
+
+pub fn unit_vector(v: &Vec3) -> Vec3 {
+    v / v.length()
 }
 
 pub struct ray {
@@ -103,11 +123,11 @@ impl ray {
         ray { orig, dir }
     }
 
-    pub fn orig(&self) -> &Point3 {
+    pub fn origin(&self) -> &Point3 {
         &self.orig
     }
 
-    pub fn dir(&self) -> &Vec3 {
+    pub fn direction(&self) -> &Vec3 {
         &self.dir
     }
 
@@ -116,6 +136,8 @@ impl ray {
     }
 
     pub fn color(&self) -> Color {
-        return Color::new(0.0, 0.0, 0.0);
+        let unit_direction: Vec3 = unit_vector(self.direction());
+        let a = 0.5 * (unit_direction.y() + 1.0);
+        Color::new(1.0, 1.0, 1.0) * (1.0 - a) + Color::new(0.5, 0.7, 1.0) * a
     }
 }

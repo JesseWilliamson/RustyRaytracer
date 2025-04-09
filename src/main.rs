@@ -53,13 +53,6 @@ fn main() -> std::io::Result<()> {
 
             let pixel_color = r.color();
             pixel_color.write_color(&mut file)?;
-
-            // let pixel_color = vectors::Color::new(
-            //     i as f64 / (image_width - 1) as f64,
-            //     j as f64 / (image_height - 1) as f64,
-            //     0.0,
-            // );
-            // pixel_color.write_color(&mut file)?;
         }
     }
 
