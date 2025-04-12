@@ -39,7 +39,7 @@ fn main() -> std::io::Result<()> {
 
     let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
 
-    let bar = ProgressBar::new((image_height - 1) as u64);
+    let bar = ProgressBar::new(image_height as u64);
 
     file.write_all(format!("P3\n{} {}\n255\n", image_width, image_height).as_bytes())?;
 
@@ -49,13 +49,14 @@ fn main() -> std::io::Result<()> {
             let pixel_center =
                 pixel00_loc + (pixel_delta_u * i as f64) + (pixel_delta_v * j as f64);
             let ray_direction = pixel_center - camera_center;
-            let r = vectors::ray::new(camera_center, ray_direction);
+            let r = vectors::Ray::new(camera_center, ray_direction);
 
-            let pixel_color = r.color();
+            let pixel_color = r.ray_color();
             pixel_color.write_color(&mut file)?;
         }
     }
 
+    bar.finish();
     Ok(())
 }
 
@@ -69,6 +70,7 @@ mod tests {
         assert_eq!(a + b, vectors::Vec3::new(1.0, 4.0, 1.0));
         assert_eq!(a - b, vectors::Vec3::new(-1.0, 2.0, -1.0));
         assert_eq!(b.length_squared(), 3.0);
+        assert_eq!(vectors::dot(a, b), 3.0);
         let c = vectors::Color::new(0.9, 0.1, 0.5);
         let mut stdout = std::io::stdout();
         c.write_color(&mut stdout).unwrap();
