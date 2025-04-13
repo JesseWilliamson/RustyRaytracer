@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 indicatif = "0.17.11"
+
+[lib]
+name = "raytracing_in_a_weekend_rust"
+path = "src/lib.rs"

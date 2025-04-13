@@ -1,8 +1,8 @@
 use indicatif::ProgressBar;
+use raytracing_in_a_weekend_rust::{rays, sphere, vectors};
 use std::env;
 use std::fs::File;
 use std::io::Write;
-mod vectors;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -49,9 +49,9 @@ fn main() -> std::io::Result<()> {
             let pixel_center =
                 pixel00_loc + (pixel_delta_u * i as f64) + (pixel_delta_v * j as f64);
             let ray_direction = pixel_center - camera_center;
-            let r = vectors::Ray::new(camera_center, ray_direction);
+            let r = rays::Ray::new(camera_center, ray_direction);
 
-            let pixel_color = r.ray_color();
+            let pixel_color = rays::ray_color(r);
             pixel_color.write_color(&mut file)?;
         }
     }
