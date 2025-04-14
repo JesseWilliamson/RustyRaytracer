@@ -79,6 +79,18 @@ impl ops::Div<f64> for Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+}
+
 pub fn dot(a: Vec3, b: Vec3) -> f64 {
     a.x * b.x + a.y * b.y + a.z * b.z
 }

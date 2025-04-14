@@ -34,13 +34,17 @@ impl hittable::Hittable for Sphere {
             }
         }
 
-        let hit_t = root;
-        let hit_point = r.at(hit_t);
-        let hit_normal = (hit_point - self.center) / self.radius;
+        let t = root;
+        let p = r.at(t);
+        let outward_normal = (p - self.center) / self.radius;
+        // Outward normal is the normal to the surface of the sphere pointing outwards,
+        // normal is relative from the ray in case it's hitting from inside.
+        let (front_face, normal) = hittable::face_normal(r, outward_normal);
         Some(HitRecord {
-            p: hit_point,
-            normal: hit_normal,
-            t: hit_t,
+            p,
+            normal,
+            t,
+            front_face,
         })
     }
 }
