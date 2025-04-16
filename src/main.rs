@@ -1,19 +1,17 @@
 use indicatif::ProgressBar;
-use raytracing_in_a_weekend_rust::hittable::Hittable;
+use raytracing_in_a_weekend_rust::hittable::{Hittable, HittableList};
+use raytracing_in_a_weekend_rust::sphere::Sphere;
 use raytracing_in_a_weekend_rust::{rays, sphere, vectors};
 use std::env;
+use std::f64::INFINITY;
 use std::fs::File;
 use std::io::Write;
+use std::rc::Rc;
 
-pub fn ray_color(r: rays::Ray) -> vectors::Color {
-    let sphere_center = vectors::Point3::new(0.0, 0.0, -1.0);
-    let sphere = sphere::Sphere::new(sphere_center, 0.5);
-    let hit_record = sphere.hit(r, -1000.0, 1000.0);
+pub fn ray_color(r: rays::Ray, world: &HittableList) -> vectors::Color {
+    let hit_record = world.hit(r, 0.0, INFINITY);
     match hit_record {
-        Some(rec) => {
-            let n = vectors::unit_vector(r.at(rec.t) - vectors::Vec3::new(0.0, 0.0, -1.0));
-            0.5 * vectors::Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0)
-        }
+        Some(rec) => 0.5 * (rec.normal + vectors::Color::new(1.0, 1.0, 1.0)),
         None => {
             let unit_direction = vectors::unit_vector(r.direction());
             let a = 0.5 * (unit_direction.y() + 1.0);
@@ -37,6 +35,17 @@ fn main() -> std::io::Result<()> {
     let aspect_ratio = 16.0 / 9.0;
     let image_width: i32 = 400;
     let image_height: i32 = std::cmp::max(1, (image_width as f64 / aspect_ratio) as i32);
+
+    // World
+    let mut world = HittableList::new();
+    world.add(Rc::new(Sphere::new(
+        vectors::Point3::new(0.0, 0.0, -1.0),
+        0.5,
+    )));
+    world.add(Rc::new(Sphere::new(
+        vectors::Point3::new(0.0, -100.5, -1.0),
+        100.0,
+    )));
 
     // Camera
     let focal_length = 1.0;
@@ -69,7 +78,7 @@ fn main() -> std::io::Result<()> {
             let ray_direction = pixel_center - camera_center;
             let r = rays::Ray::new(camera_center, ray_direction);
 
-            let pixel_color = ray_color(r);
+            let pixel_color = ray_color(r, &world);
             pixel_color.write_color(&mut file)?;
         }
     }
