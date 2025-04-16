@@ -15,7 +15,7 @@ impl Sphere {
 }
 
 impl hittable::Hittable for Sphere {
-    fn hit(self, r: rays::Ray, ray_tmin: f64, ray_tmax: f64) -> Option<hittable::HitRecord> {
+    fn hit(&self, r: rays::Ray, ray_tmin: f64, ray_tmax: f64) -> Option<hittable::HitRecord> {
         let oc = self.center - r.origin();
         let a = r.direction().length_squared();
         let h = vectors::dot(r.direction(), oc);

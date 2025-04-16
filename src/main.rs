@@ -1,8 +1,26 @@
 use indicatif::ProgressBar;
+use raytracing_in_a_weekend_rust::hittable::Hittable;
 use raytracing_in_a_weekend_rust::{rays, sphere, vectors};
 use std::env;
 use std::fs::File;
 use std::io::Write;
+
+pub fn ray_color(r: rays::Ray) -> vectors::Color {
+    let sphere_center = vectors::Point3::new(0.0, 0.0, -1.0);
+    let sphere = sphere::Sphere::new(sphere_center, 0.5);
+    let hit_record = sphere.hit(r, -1000.0, 1000.0);
+    match hit_record {
+        Some(rec) => {
+            let n = vectors::unit_vector(r.at(rec.t) - vectors::Vec3::new(0.0, 0.0, -1.0));
+            0.5 * vectors::Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0)
+        }
+        None => {
+            let unit_direction = vectors::unit_vector(r.direction());
+            let a = 0.5 * (unit_direction.y() + 1.0);
+            (1.0 - a) * vectors::Color::new(1.0, 1.0, 1.0) + vectors::Color::new(0.5, 0.7, 1.0) * a
+        }
+    }
+}
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -51,7 +69,7 @@ fn main() -> std::io::Result<()> {
             let ray_direction = pixel_center - camera_center;
             let r = rays::Ray::new(camera_center, ray_direction);
 
-            let pixel_color = rays::ray_color(r);
+            let pixel_color = ray_color(r);
             pixel_color.write_color(&mut file)?;
         }
     }
