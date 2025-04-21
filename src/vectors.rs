@@ -10,7 +10,7 @@ pub type Color = Vec3;
 pub type Point3 = Vec3;
 
 impl Color {
-    pub fn write_color<W: Write>(self, out: &mut W) -> Result<(), std::io::Error> {
+    pub fn write_color<W: Write>(&self, out: &mut W) -> Result<(), std::io::Error> {
         let r = self.x;
         let g = self.y;
         let b = self.z;
@@ -108,23 +108,23 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
-    pub fn x(self) -> f64 {
+    pub fn x(&self) -> f64 {
         self.x
     }
 
-    pub fn y(self) -> f64 {
+    pub fn y(&self) -> f64 {
         self.y
     }
 
-    pub fn z(self) -> f64 {
+    pub fn z(&self) -> f64 {
         self.z
     }
 
-    pub fn length_squared(self) -> f64 {
+    pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn length(self) -> f64 {
+    pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 }
