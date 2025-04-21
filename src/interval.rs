@@ -23,11 +23,11 @@ impl Interval {
     }
 
     pub fn contains(self, x: f64) -> bool {
-        x <= self.min && x >= self.max
+        x >= self.min && x <= self.max
     }
 
     pub fn surrounds(self, x: f64) -> bool {
-        x < self.min && x > self.max
+        x > self.min && x < self.max
     }
 
     pub fn empty() -> Interval {
