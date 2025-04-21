@@ -1,5 +1,6 @@
 use indicatif::ProgressBar;
 use raytracing_in_a_weekend_rust::hittable::{Hittable, HittableList};
+use raytracing_in_a_weekend_rust::interval::Interval;
 use raytracing_in_a_weekend_rust::sphere::Sphere;
 use raytracing_in_a_weekend_rust::{rays, sphere, vectors};
 use std::env;
@@ -9,7 +10,7 @@ use std::io::Write;
 use std::rc::Rc;
 
 pub fn ray_color(r: rays::Ray, world: &HittableList) -> vectors::Color {
-    let hit_record = world.hit(r, 0.0, INFINITY);
+    let hit_record = world.hit(r, Interval::new(0.0, INFINITY));
     match hit_record {
         Some(rec) => 0.5 * (rec.normal + vectors::Color::new(1.0, 1.0, 1.0)),
         None => {

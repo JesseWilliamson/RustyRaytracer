@@ -1,6 +1,6 @@
 use crate::{
     hittable::{self, HitRecord},
-    rays, vectors,
+    interval, rays, vectors,
 };
 
 pub struct Sphere {
@@ -15,7 +15,7 @@ impl Sphere {
 }
 
 impl hittable::Hittable for Sphere {
-    fn hit(&self, r: rays::Ray, ray_tmin: f64, ray_tmax: f64) -> Option<hittable::HitRecord> {
+    fn hit(&self, r: rays::Ray, ray_t: interval::Interval) -> Option<hittable::HitRecord> {
         let oc = self.center - r.origin();
         let a = r.direction().length_squared();
         let h = vectors::dot(r.direction(), oc);
@@ -27,9 +27,9 @@ impl hittable::Hittable for Sphere {
 
         let sqrtd = discriminant.sqrt();
         let mut root = (h - sqrtd) / a;
-        if root <= ray_tmin || root >= ray_tmax {
+        if root <= ray_t.min() || root >= ray_t.max() {
             root = (h + sqrtd) / a;
-            if root <= ray_tmin || root >= ray_tmax {
+            if root <= ray_t.min() || root >= ray_t.max() {
                 return None;
             }
         }

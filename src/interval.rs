@@ -10,6 +10,14 @@ impl Interval {
         Interval { min, max }
     }
 
+    pub fn min(&self) -> f64 {
+        self.min
+    }
+
+    pub fn max(&self) -> f64 {
+        self.max
+    }
+
     pub fn size(self) -> f64 {
         self.max - self.min
     }
