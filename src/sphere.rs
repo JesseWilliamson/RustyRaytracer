@@ -24,9 +24,9 @@ impl hittable::Hittable for Sphere {
 
         let sqrtd = discriminant.sqrt();
         let mut root = (h - sqrtd) / a;
-        if root <= ray_t.min() || root >= ray_t.max() {
+        if ray_t.surrounds(root) {
             root = (h + sqrtd) / a;
-            if root <= ray_t.min() || root >= ray_t.max() {
+            if !ray_t.surrounds(root) {
                 return None;
             }
         }
