@@ -1,4 +1,4 @@
-use crate::{hittable, interval, rays, vectors};
+use crate::{hit_record, hittable, interval, rays, vectors};
 
 pub struct Sphere {
     center: vectors::Vec3,
@@ -12,7 +12,7 @@ impl Sphere {
 }
 
 impl hittable::Hittable for Sphere {
-    fn hit(&self, r: rays::Ray, ray_t: interval::Interval) -> Option<hittable::HitRecord> {
+    fn hit(&self, r: &rays::Ray, ray_t: &interval::Interval) -> Option<hit_record::HitRecord> {
         let oc = self.center - r.origin();
         let a = r.direction().length_squared();
         let h = vectors::dot(r.direction(), oc);
@@ -36,8 +36,8 @@ impl hittable::Hittable for Sphere {
         let outward_normal = (p - self.center) / self.radius;
         // Outward normal is the normal to the surface of the sphere pointing outwards,
         // normal is relative from the ray in case it's hitting from inside.
-        let (front_face, normal) = hittable::face_normal(r, outward_normal);
-        Some(hittable::HitRecord {
+        let (front_face, normal) = hit_record::face_normal(r, &outward_normal);
+        Some(hit_record::HitRecord {
             p,
             normal,
             t,

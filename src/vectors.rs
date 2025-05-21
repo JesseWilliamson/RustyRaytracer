@@ -1,4 +1,4 @@
-use std::{io::Write, ops};
+use std;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
@@ -10,7 +10,7 @@ pub type Color = Vec3;
 pub type Point3 = Vec3;
 
 impl Color {
-    pub fn write_color<W: Write>(&self, out: &mut W) -> Result<(), std::io::Error> {
+    pub fn write_color<W: std::io::Write>(&self, out: &mut W) -> Result<(), std::io::Error> {
         let r = self.x;
         let g = self.y;
         let b = self.z;
@@ -23,7 +23,7 @@ impl Color {
     }
 }
 
-impl ops::Add<Vec3> for Vec3 {
+impl std::ops::Add<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn add(self, rhs: Vec3) -> Vec3 {
@@ -35,7 +35,7 @@ impl ops::Add<Vec3> for Vec3 {
     }
 }
 
-impl ops::Sub<Vec3> for Vec3 {
+impl std::ops::Sub<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn sub(self, rhs: Vec3) -> Vec3 {
@@ -47,7 +47,7 @@ impl ops::Sub<Vec3> for Vec3 {
     }
 }
 
-impl ops::Mul<f64> for Vec3 {
+impl std::ops::Mul<f64> for Vec3 {
     type Output = Vec3;
 
     fn mul(self, rhs: f64) -> Vec3 {
@@ -59,7 +59,7 @@ impl ops::Mul<f64> for Vec3 {
     }
 }
 
-impl ops::Mul<Vec3> for f64 {
+impl std::ops::Mul<Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Vec3 {
@@ -67,7 +67,7 @@ impl ops::Mul<Vec3> for f64 {
     }
 }
 
-impl ops::Div<f64> for Vec3 {
+impl std::ops::Div<f64> for Vec3 {
     type Output = Vec3;
 
     fn div(self, rhs: f64) -> Vec3 {
@@ -79,7 +79,7 @@ impl ops::Div<f64> for Vec3 {
     }
 }
 
-impl ops::Neg for Vec3 {
+impl std::ops::Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Vec3 {

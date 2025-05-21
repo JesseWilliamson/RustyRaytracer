@@ -1,25 +1,8 @@
-use indicatif::ProgressBar;
-use raytracing_in_a_weekend_rust::hittable::{Hittable, HittableList};
-use raytracing_in_a_weekend_rust::interval::Interval;
-use raytracing_in_a_weekend_rust::sphere::Sphere;
-use raytracing_in_a_weekend_rust::{rays, sphere, vectors};
+use raytracing_in_a_weekend_rust::camera::Camera;
+use raytracing_in_a_weekend_rust::{hittable_list, sphere, vectors};
 use std::env;
-use std::f64::INFINITY;
 use std::fs::File;
-use std::io::Write;
 use std::rc::Rc;
-
-pub fn ray_color(r: rays::Ray, world: &HittableList) -> vectors::Color {
-    let hit_record = world.hit(r, Interval::new(0.0, INFINITY));
-    match hit_record {
-        Some(rec) => 0.5 * (rec.normal + vectors::Color::new(1.0, 1.0, 1.0)),
-        None => {
-            let unit_direction = vectors::unit_vector(r.direction());
-            let a = 0.5 * (unit_direction.y() + 1.0);
-            (1.0 - a) * vectors::Color::new(1.0, 1.0, 1.0) + vectors::Color::new(0.5, 0.7, 1.0) * a
-        }
-    }
-}
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -32,59 +15,19 @@ fn main() -> std::io::Result<()> {
     println!("{}", file_name);
     let mut file = File::create(file_name)?;
 
-    // Image
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width: i32 = 400;
-    let image_height: i32 = std::cmp::max(1, (image_width as f64 / aspect_ratio) as i32);
-
     // World
-    let mut world = HittableList::new();
-    world.add(Rc::new(Sphere::new(
+    let mut world = hittable_list::HittableList::new();
+    world.add(Rc::new(sphere::Sphere::new(
         vectors::Point3::new(0.0, 0.0, -1.0),
         0.5,
     )));
-    world.add(Rc::new(Sphere::new(
+    world.add(Rc::new(sphere::Sphere::new(
         vectors::Point3::new(0.0, -100.5, -1.0),
         100.0,
     )));
 
-    // Camera
-    let focal_length = 1.0;
-    let viewport_height = 2.0;
-    let viewport_width = viewport_height * image_width as f64 / image_height as f64;
-    let camera_center = vectors::Point3::new(0.0, 0.0, 0.0);
-
-    let viewport_u = vectors::Vec3::new(viewport_width, 0.0, 0.0);
-    let viewport_v = vectors::Vec3::new(0.0, -viewport_height, 0.0);
-
-    let pixel_delta_u = viewport_u / image_width as f64;
-    let pixel_delta_v = viewport_v / image_height as f64;
-
-    let viewport_upper_left = camera_center
-        - vectors::Vec3::new(0.0, 0.0, focal_length)
-        - viewport_u / 2.0
-        - viewport_v / 2.0;
-
-    let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
-
-    let bar = ProgressBar::new(image_height as u64);
-
-    file.write_all(format!("P3\n{} {}\n255\n", image_width, image_height).as_bytes())?;
-
-    for j in 0..image_height {
-        bar.inc(1);
-        for i in 0..image_width {
-            let pixel_center =
-                pixel00_loc + (pixel_delta_u * i as f64) + (pixel_delta_v * j as f64);
-            let ray_direction = pixel_center - camera_center;
-            let r = rays::Ray::new(camera_center, ray_direction);
-
-            let pixel_color = ray_color(r, &world);
-            pixel_color.write_color(&mut file)?;
-        }
-    }
-
-    bar.finish();
+    let camera = Camera::new(400, 16.0 / 9.0);
+    camera.render(&world, &mut file)?;
     Ok(())
 }
 
