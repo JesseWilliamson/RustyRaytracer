@@ -1,5 +1,7 @@
 use std;
 
+use crate::interval::Interval;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
     x: f64,
@@ -15,9 +17,10 @@ impl Color {
         let g = self.y;
         let b = self.z;
 
-        let r_byte = (255.999 * r) as i32;
-        let g_byte = (255.999 * g) as i32;
-        let b_byte = (255.999 * b) as i32;
+        let intensity = Interval::new(0.000, 0.999);
+        let r_byte = (255.999 * intensity.clamp(r)) as i32;
+        let g_byte = (255.999 * intensity.clamp(g)) as i32;
+        let b_byte = (255.999 * intensity.clamp(b)) as i32;
 
         write!(out, "{} {} {}\n", r_byte, g_byte, b_byte)
     }
