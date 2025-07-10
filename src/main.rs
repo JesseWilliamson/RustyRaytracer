@@ -26,7 +26,8 @@ fn main() -> std::io::Result<()> {
         100.0,
     )));
 
-    let camera = Camera::new(400, 16.0 / 9.0);
+    let camera = Camera::new(400, 16.0 / 9.0, 100);
+
     camera.render(&world, &mut file)?;
     Ok(())
 }
