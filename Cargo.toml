@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-indicatif = "0.17.11"
+indicatif = "0.18.0"
 rand = "0.9.1"
-rng = "0.1.0"
 
 [lib]
 name = "raytracing_in_a_weekend_rust"

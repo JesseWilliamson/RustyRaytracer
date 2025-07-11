@@ -22,10 +22,10 @@ impl hittable::Hittable for Sphere {
             return None;
         }
 
-        let sqrtd = discriminant.sqrt();
-        let mut root = (h - sqrtd) / a;
+        let discriminant_sqrt = discriminant.sqrt();
+        let mut root = (h - discriminant_sqrt) / a;
         if !ray_t.surrounds(root) {
-            root = (h + sqrtd) / a;
+            root = (h + discriminant_sqrt) / a;
             if !ray_t.surrounds(root) {
                 return None;
             }

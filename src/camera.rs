@@ -1,18 +1,11 @@
-use rand::rngs::ThreadRng;
 use rand::Rng;
-use std::f64::INFINITY;
-use std::ops::AddAssign;
 use indicatif::ProgressBar;
 
 use crate::hittable;
 use crate::hittable_list;
 use crate::interval;
-use crate::interval::Interval;
 use crate::rays;
-use crate::rays::Ray;
 use crate::vectors;
-use crate::vectors::Color;
-use crate::vectors::Vec3;
 
 pub struct Camera {
     aspect_ratio: f64,
@@ -59,7 +52,7 @@ impl Camera {
     }
 
     fn ray_color(r: &rays::Ray, world: &hittable_list::HittableList) -> vectors::Color {
-        let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.0, INFINITY));
+        let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.0, f64::INFINITY));
         match hit_record {
             Some(rec) => 0.5 * (rec.normal + vectors::Color::new(1.0, 1.0, 1.0)),
             None => {
@@ -71,7 +64,7 @@ impl Camera {
         }
     }
 
-    fn get_ray(&self, i: i32, j: i32) -> Ray {
+    fn get_ray(&self, i: i32, j: i32) -> rays::Ray {
         let offset = Self::sample_square();
         let pixel_sample = self.pixel00_loc
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
@@ -82,11 +75,11 @@ impl Camera {
         rays::Ray::new(ray_origin, ray_direction)
     }
 
-    fn sample_square() -> Vec3 {
+    fn sample_square() -> vectors::Vec3 {
         // Returns a vector to a random point in the [-.5, -.5], [+.5, +.5] unit square.
         let mut rng = rand::rng();
 
-        Vec3::new(
+        vectors::Vec3::new(
             rng.random_range(-0.5..0.5),
             rng.random_range(-0.5..0.5),
             0.0,
@@ -105,7 +98,7 @@ impl Camera {
             bar.inc(1);
             for i in 0..self.image_width {
                 let mut pixel_color = vectors::Color::new(0.0, 0.0, 0.0);
-                for sample in 0..self.samples_per_pixel {
+                for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
                     pixel_color += Camera::ray_color(&r, world);
                 }
