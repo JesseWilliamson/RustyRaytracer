@@ -86,11 +86,11 @@ impl Camera {
         // Returns a vector to a random point in the [-.5, -.5], [+.5, +.5] unit square.
         let mut rng = rand::rng();
 
-        return Vec3::new(
+        Vec3::new(
             rng.random_range(-0.5..0.5),
             rng.random_range(-0.5..0.5),
             0.0,
-        );
+        )
     }
 
     pub fn render<W: std::io::Write>(
