@@ -1,5 +1,4 @@
 use std;
-use crate::interval::Interval;
 use crate::utils;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -78,6 +77,10 @@ impl Vec3 {
     pub fn z(&self) -> f64 { self.z }
     pub fn length_squared(&self) -> f64 { self.x * self.x + self.y * self.y + self.z * self.z }
     pub fn length(&self) -> f64 { self.length_squared().sqrt() }
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
 }
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
@@ -107,4 +110,13 @@ pub fn random_unit_vector() -> Vec3 {
 pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
     let on_unit_sphere = random_unit_vector();
     if dot(on_unit_sphere, normal) > 0.0 { on_unit_sphere } else { -on_unit_sphere }
+}
+
+pub fn random_in_unit_sphere() -> Vec3 {
+    loop {
+        let p = random_in_range(-1.0, 1.0);
+        if p.length_squared() < 1.0 {
+            return p;
+        }
+    }
 }

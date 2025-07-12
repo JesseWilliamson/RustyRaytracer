@@ -9,3 +9,5 @@ pub mod utils;
 pub mod vector;
 pub mod color;
 pub mod point;
+pub mod material;
+pub mod lambertian;

@@ -1,13 +1,15 @@
-use crate::{hit_record, hittable, interval, rays, vector, color, point};
+use std::rc;
+use crate::{hit_record, hittable, interval, rays, vector, material};
 
 pub struct Sphere {
     center: vector::Vec3,
     radius: f64,
+    material: rc::Rc<dyn material::Material>
 }
 
 impl Sphere {
-    pub fn new(center: vector::Vec3, radius: f64) -> Sphere {
-        Sphere { center, radius }
+    pub fn new(center: vector::Vec3, radius: f64, material: rc::Rc<dyn material::Material>) -> Sphere {
+        Sphere { center, radius, material }
     }
 }
 
@@ -42,6 +44,7 @@ impl hittable::Hittable for Sphere {
             normal,
             t,
             front_face,
+            material: self.material.clone(),
         })
     }
 }

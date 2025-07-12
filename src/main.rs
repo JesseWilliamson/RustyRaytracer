@@ -1,5 +1,5 @@
 use raytracing_in_a_weekend_rust::camera::Camera;
-use raytracing_in_a_weekend_rust::{hittable_list, sphere, vector, color, point};
+use raytracing_in_a_weekend_rust::{hittable_list, sphere, vector, color, point, lambertian};
 use std::env;
 use std::fs::File;
 use std::io;
@@ -15,16 +15,20 @@ fn main() -> io::Result<()> {
     let file_name = &args[1];
     println!("{}", file_name);
     let mut file = File::create(file_name)?;
+    
+    let default_material = Rc::new(lambertian::Lambertian::new(color::Color::new(0.7, 0.3, 0.3)));
 
     // World
     let mut world = hittable_list::HittableList::new();
     world.add(Rc::new(sphere::Sphere::new(
         point::Point3::new(0.0, 0.0, -1.0),
         0.5,
+        default_material.clone(),
     )));
     world.add(Rc::new(sphere::Sphere::new(
         point::Point3::new(0.0, -100.5, -1.0),
         100.0,
+        default_material.clone(),
     )));
 
     let camera = Camera::new(400, 16.0 / 9.0, 100);
