@@ -1,6 +1,6 @@
 use std;
-
 use crate::interval::Interval;
+use crate::utils;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
@@ -144,4 +144,20 @@ impl Vec3 {
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
     v / v.length()
+}
+
+pub fn random() -> Vec3 {
+    Vec3 {
+        x: utils::random_f64(),
+        y: utils::random_f64(),
+        z: utils::random_f64(),
+    }
+}
+
+pub fn random_in_range(min: f64, max: f64) -> Vec3 {
+    Vec3 {
+        x: utils::random_f64_in_range(min, max),
+        y: utils::random_f64_in_range(min, max),
+        z: utils::random_f64_in_range(min, max),
+    }
 }
