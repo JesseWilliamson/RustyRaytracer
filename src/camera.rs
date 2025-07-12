@@ -51,10 +51,16 @@ impl Camera {
         }
     }
 
-    fn ray_color(r: &rays::Ray, world: &hittable_list::HittableList) -> vectors::Color {
+    fn ray_color(r: &rays::Ray, world: &hittable_list::HittableList, depth: u32) -> vectors::Color {
+        if depth == 0 {
+            return vectors::Color::new(0.0, 0.0, 0.0);
+        }
         let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.0, f64::INFINITY));
         match hit_record {
-            Some(rec) => 0.5 * (rec.normal + vectors::Color::new(1.0, 1.0, 1.0)),
+            Some(rec) => {
+                let direction = vectors::random_on_hemisphere(rec.normal);
+                0.5 * Camera::ray_color(&rays::Ray::new(rec.p, direction), world, depth - 1)
+            },
             None => {
                 let unit_direction = vectors::unit_vector(r.direction());
                 let a = 0.5 * (unit_direction.y() + 1.0);
@@ -94,15 +100,16 @@ impl Camera {
         out.write_all(format!("P3\n{} {}\n255\n", self.image_width, self.image_height).as_bytes())?;
 
         let bar = ProgressBar::new(self.image_height as u64);
+        let max_depth = 50;
         for j in 0..self.image_height {
             bar.inc(1);
             for i in 0..self.image_width {
                 let mut pixel_color = vectors::Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += Camera::ray_color(&r, world);
+                    pixel_color += Camera::ray_color(&r, world, max_depth);
                 }
-                pixel_color = pixel_color * self.samples_per_pixel as f64;
+                pixel_color = pixel_color / self.samples_per_pixel as f64;
                 pixel_color.write_color(out)?;
             }
         }
