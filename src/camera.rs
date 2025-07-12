@@ -13,6 +13,12 @@ pub struct Camera {
     image_width: i32,
     image_height: i32,
     vertical_fov: f64,
+    look_from: point::Point3,
+    look_at: point::Point3,
+    vup: vector::Vec3,
+    u: vector::Vec3,
+    v: vector::Vec3,
+    w: vector::Vec3,
     samples_per_pixel: i32,
     center: point::Point3,
     pixel00_loc: point::Point3,
@@ -21,23 +27,27 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(image_width: i32, aspect_ratio: f64, vertical_fov: f64, samples_per_pixel: i32) -> Self {
+    pub fn new(image_width: i32, aspect_ratio: f64, vertical_fov: f64, look_from: point::Point3, look_at: point::Point3, vup: vector::Vec3, samples_per_pixel: i32) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as i32;
-        let focal_length = 1.0;
+        let focal_length = (look_from - look_at).length();
         let theta = utils::degrees_to_radians(vertical_fov);
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * image_width as f64 / image_height as f64;
-        let center = point::Point3::new(0.0, 0.0, 0.0);
+        let center = look_from;
 
-        let viewport_u = vector::Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = vector::Vec3::new(0.0, -viewport_height, 0.0);
+        let w = vector::unit_vector(look_from - look_at);
+        let u = vector::unit_vector(vector::cross(vup, w));
+        let v = vector::cross(w, u);
+
+        let viewport_u = u * viewport_width;
+        let viewport_v = -v * viewport_height;
 
         let pixel_delta_u = viewport_u / image_width as f64;
         let pixel_delta_v = viewport_v / image_height as f64;
 
         let viewport_upper_left = center
-            - vector::Vec3::new(0.0, 0.0, focal_length)
+            - w * focal_length
             - viewport_u / 2.0
             - viewport_v / 2.0;
 
@@ -48,6 +58,12 @@ impl Camera {
             image_width,
             image_height,
             vertical_fov,
+            look_from,
+            look_at,
+            vup,
+            u,
+            v,
+            w,
             samples_per_pixel,
             center,
             pixel00_loc,
