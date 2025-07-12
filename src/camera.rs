@@ -1,4 +1,3 @@
-use rand::Rng;
 use indicatif::ProgressBar;
 
 use crate::hittable;
@@ -8,30 +7,26 @@ use crate::ray;
 use crate::utils;
 use crate::{vector, color, point};
 
+#[derive(Debug, Clone)]
 pub struct Camera {
-    aspect_ratio: f64,
     image_width: i32,
     image_height: i32,
-    vertical_fov: f64,
-    look_from: point::Point3,
-    look_at: point::Point3,
-    vup: vector::Vec3,
-    u: vector::Vec3,
-    v: vector::Vec3,
-    w: vector::Vec3,
     samples_per_pixel: i32,
     max_depth: u32,
+
+    // Derived
+    u: vector::Vec3,
+    v: vector::Vec3,
     center: point::Point3,
     pixel00_loc: point::Point3,
     pixel_delta_u: vector::Vec3,
     pixel_delta_v: vector::Vec3,
-    defocus_angle: f64,
-    focus_dist: f64,
     lens_radius: f64,
 }
 
 impl Camera {
-    pub fn new(
+    /// Internal constructor, prefer using CameraBuilder.
+    fn new(
         image_width: i32,
         aspect_ratio: f64,
         vertical_fov: f64,
@@ -71,24 +66,16 @@ impl Camera {
         let lens_radius = (defocus_angle.to_radians() / 2.0).tan() * focus_dist;
 
         Camera {
-            aspect_ratio,
             image_width,
             image_height,
-            vertical_fov,
-            look_from,
-            look_at,
-            vup,
-            u,
-            v,
-            w,
             samples_per_pixel,
             max_depth,
+            u,
+            v,
             center,
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
-            defocus_angle,
-            focus_dist,
             lens_radius,
         }
     }
@@ -134,14 +121,13 @@ impl Camera {
         ray::Ray::new(ray_origin, ray_direction)
     }
 
-    /// Returns a random point in the unit disk (for lens sampling)
     fn random_in_unit_disk() -> vector::Vec3 {
         use rand::Rng;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         loop {
             let p = vector::Vec3::new(
-                rng.gen_range(-1.0..1.0),
-                rng.gen_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
                 0.0,
             );
             if p.length_squared() < 1.0 {
@@ -150,14 +136,12 @@ impl Camera {
         }
     }
 
-    /// Returns a vector to a random point in the [0, 1) x [0, 1) unit square.
-    /// See "Generating Sample Rays" in Ray Tracing in One Weekend.
     fn sample_square() -> vector::Vec3 {
         use rand::Rng;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         vector::Vec3::new(
-            rng.gen_range(0.0..1.0),
-            rng.gen_range(0.0..1.0),
+            rng.random_range(0.0..1.0),
+            rng.random_range(0.0..1.0),
             0.0,
         )
     }
@@ -185,5 +169,93 @@ impl Camera {
         }
         bar.finish();
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CameraBuilder {
+    aspect_ratio: f64,
+    image_width: i32,
+    vertical_fov: f64,
+    look_from: point::Point3,
+    look_at: point::Point3,
+    vup: vector::Vec3,
+    samples_per_pixel: i32,
+    max_depth: u32,
+    defocus_angle: f64,
+    focus_dist: f64,
+}
+
+impl Default for CameraBuilder {
+    fn default() -> Self {
+        Self {
+            aspect_ratio: 16.0 / 9.0,
+            image_width: 400,
+            vertical_fov: 20.0,
+            look_from: point::Point3::new(0.0, 0.0, 0.0),
+            look_at: point::Point3::new(0.0, 0.0, -1.0),
+            vup: vector::Vec3::new(0.0, 1.0, 0.0),
+            samples_per_pixel: 10,
+            max_depth: 10,
+            defocus_angle: 0.0,
+            focus_dist: 10.0,
+        }
+    }
+}
+
+impl CameraBuilder {
+    pub fn aspect_ratio(mut self, aspect_ratio: f64) -> Self {
+        self.aspect_ratio = aspect_ratio;
+        self
+    }
+    pub fn image_width(mut self, image_width: i32) -> Self {
+        self.image_width = image_width;
+        self
+    }
+    pub fn vertical_fov(mut self, vertical_fov: f64) -> Self {
+        self.vertical_fov = vertical_fov;
+        self
+    }
+    pub fn look_from(mut self, look_from: point::Point3) -> Self {
+        self.look_from = look_from;
+        self
+    }
+    pub fn look_at(mut self, look_at: point::Point3) -> Self {
+        self.look_at = look_at;
+        self
+    }
+    pub fn vup(mut self, vup: vector::Vec3) -> Self {
+        self.vup = vup;
+        self
+    }
+    pub fn samples_per_pixel(mut self, spp: i32) -> Self {
+        self.samples_per_pixel = spp;
+        self
+    }
+    pub fn max_depth(mut self, max_depth: u32) -> Self {
+        self.max_depth = max_depth;
+        self
+    }
+    pub fn defocus_angle(mut self, angle: f64) -> Self {
+        self.defocus_angle = angle;
+        self
+    }
+    pub fn focus_dist(mut self, dist: f64) -> Self {
+        self.focus_dist = dist;
+        self
+    }
+    pub fn build(self) -> Camera {
+        Camera::new(
+            self.image_width,
+            self.aspect_ratio,
+            self.vertical_fov,
+            self.look_from,
+            self.look_at,
+            self.vup,
+            self.samples_per_pixel,
+            self.max_depth,
+            self.defocus_angle,
+            self.focus_dist,
+        )
     }
 }

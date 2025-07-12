@@ -1,5 +1,5 @@
 mod random_scene;
-use raytracing_in_a_weekend_rust::camera::Camera;
+use raytracing_in_a_weekend_rust::camera::CameraBuilder;
 use raytracing_in_a_weekend_rust::{vector, point};
 use random_scene::random_scene;
 use std::env;
@@ -19,18 +19,18 @@ fn main() -> io::Result<()> {
 
     let world = random_scene();
 
-    let camera = Camera::new(
-        1200,                 // image_width
-        16.0 / 9.0,           // aspect_ratio
-        20.0,                 // vertical_fov (vfov)
-        point::Point3::new(13.0, 2.0, 3.0), // lookfrom
-        point::Point3::new(0.0, 0.0, 0.0),  // lookat
-        vector::Vec3::new(0.0, 1.0, 0.0),   // vup
-        500,                  // samples_per_pixel
-        50,                   // max_depth
-        0.6,                  // defocus_angle
-        10.0                  // focus_dist
-    );
+    let camera = CameraBuilder::default()
+        .image_width(1200)
+        .aspect_ratio(16.0 / 9.0)
+        .vertical_fov(20.0)
+        .look_from(point::Point3::new(13.0, 2.0, 3.0))
+        .look_at(point::Point3::new(0.0, 0.0, 0.0))
+        .vup(vector::Vec3::new(0.0, 1.0, 0.0))
+        .samples_per_pixel(500)
+        .max_depth(50)
+        .defocus_angle(0.6)
+        .focus_dist(10.0)
+        .build();
 
     camera.render(&world, &mut file)?;
     Ok(())
