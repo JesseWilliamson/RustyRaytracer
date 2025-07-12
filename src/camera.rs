@@ -20,6 +20,7 @@ pub struct Camera {
     v: vector::Vec3,
     w: vector::Vec3,
     samples_per_pixel: i32,
+    max_depth: u32,
     center: point::Point3,
     pixel00_loc: point::Point3,
     pixel_delta_u: vector::Vec3,
@@ -27,7 +28,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(image_width: i32, aspect_ratio: f64, vertical_fov: f64, look_from: point::Point3, look_at: point::Point3, vup: vector::Vec3, samples_per_pixel: i32) -> Self {
+    pub fn new(image_width: i32, aspect_ratio: f64, vertical_fov: f64, look_from: point::Point3, look_at: point::Point3, vup: vector::Vec3, samples_per_pixel: i32, max_depth: u32) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as i32;
         let focal_length = (look_from - look_at).length();
         let theta = utils::degrees_to_radians(vertical_fov);
@@ -65,6 +66,7 @@ impl Camera {
             v,
             w,
             samples_per_pixel,
+            max_depth,
             center,
             pixel00_loc,
             pixel_delta_u,
@@ -107,13 +109,14 @@ impl Camera {
         ray::Ray::new(ray_origin, ray_direction)
     }
 
+    /// Returns a vector to a random point in the [0, 1) x [0, 1) unit square.
+    /// See "Generating Sample Rays" in Ray Tracing in One Weekend.
     fn sample_square() -> vector::Vec3 {
-        // Returns a vector to a random point in the [-.5, -.5], [+.5, +.5] unit square.
-        let mut rng = rand::rng();
-
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
         vector::Vec3::new(
-            rng.random_range(-0.5..0.5),
-            rng.random_range(-0.5..0.5),
+            rng.gen_range(0.0..1.0),
+            rng.gen_range(0.0..1.0),
             0.0,
         )
     }
@@ -126,7 +129,7 @@ impl Camera {
         out.write_all(format!("P3\n{} {}\n255\n", self.image_width, self.image_height).as_bytes())?;
 
         let bar = ProgressBar::new(self.image_height as u64);
-        let max_depth = 50;
+        let max_depth = self.max_depth;
         for j in 0..self.image_height {
             bar.inc(1);
             for i in 0..self.image_width {

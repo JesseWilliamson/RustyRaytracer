@@ -30,14 +30,15 @@ fn main() -> io::Result<()> {
     ]);
 
     let camera = Camera::new(
-    400,
-    16.0 / 9.0,
-    90.0,
-    point::Point3::new(-2.0, 2.0, 1.0),
-    point::Point3::new(0.0, 0.0, -1.0),
-    vector::Vec3::new(0.0, 1.0, 0.0),
-    100
-);
+        400,                  // image_width
+        16.0 / 9.0,          // aspect_ratio
+        20.0,                // vertical_fov (vfov)
+        point::Point3::new(-2.0, 2.0, 1.0), // lookfrom
+        point::Point3::new(0.0, 0.0, -1.0), // lookat
+        vector::Vec3::new(0.0, 1.0, 0.0),   // vup
+        100,                 // samples_per_pixel
+        50                   // max_depth
+    );
 
     camera.render(&world, &mut file)?;
     Ok(())
