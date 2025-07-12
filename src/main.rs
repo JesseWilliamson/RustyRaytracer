@@ -2,7 +2,6 @@ use raytracing_in_a_weekend_rust::camera::Camera;
 use raytracing_in_a_weekend_rust::{hittable_list, sphere, vectors};
 use std::env;
 use std::fs::File;
-use std::rc::Rc;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -17,11 +16,11 @@ fn main() -> std::io::Result<()> {
 
     // World
     let mut world = hittable_list::HittableList::new();
-    world.add(Rc::new(sphere::Sphere::new(
+    world.add(Box::new(sphere::Sphere::new(
         vectors::Point3::new(0.0, 0.0, -1.0),
         0.5,
     )));
-    world.add(Rc::new(sphere::Sphere::new(
+    world.add(Box::new(sphere::Sphere::new(
         vectors::Point3::new(0.0, -100.5, -1.0),
         100.0,
     )));

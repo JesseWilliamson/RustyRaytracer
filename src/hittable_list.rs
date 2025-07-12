@@ -2,10 +2,9 @@ use crate::hit_record;
 use crate::hittable;
 use crate::interval;
 use crate::rays;
-use std::rc::Rc;
 
 pub struct HittableList {
-    objects: Vec<Rc<dyn hittable::Hittable>>,
+    objects: Vec<Box<dyn hittable::Hittable>>,
 }
 
 impl HittableList {
@@ -15,8 +14,14 @@ impl HittableList {
         }
     }
 
-    pub fn add(&mut self, object: Rc<dyn hittable::Hittable>) {
+    pub fn add(&mut self, object: Box<dyn hittable::Hittable>) {
         self.objects.push(object);
+    }
+}
+
+impl Default for HittableList {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -26,8 +31,7 @@ impl hittable::Hittable for HittableList {
         let mut hit_anything = None;
 
         for object in &self.objects {
-            if let Some(rec) = object.hit(r, &interval::Interval::new(ray_t.min(), closest_so_far))
-            {
+            if let Some(rec) = object.hit(r, &interval::Interval::new(ray_t.min(), closest_so_far)) {
                 closest_so_far = rec.t;
                 hit_anything = Some(rec);
             }
