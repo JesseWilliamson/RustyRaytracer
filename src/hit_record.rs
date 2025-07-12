@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use crate::{rays, vector, point, material};
+use crate::{ray, vector, point, material};
 
 pub struct HitRecord {
     pub p: point::Point3,
@@ -9,7 +9,7 @@ pub struct HitRecord {
     pub front_face: bool,
 }
 
-pub fn face_normal(r: &rays::Ray, outward_normal: &vector::Vec3) -> (bool, vector::Vec3) {
+pub fn face_normal(r: &ray::Ray, outward_normal: &vector::Vec3) -> (bool, vector::Vec3) {
     let front_face = vector::dot(r.direction(), *outward_normal) < 0.0;
     let normal = if front_face {
         *outward_normal

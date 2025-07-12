@@ -1,7 +1,7 @@
 use crate::hit_record;
 use crate::hittable;
 use crate::interval;
-use crate::rays;
+use crate::ray;
 use std::rc::Rc;
 
 pub struct HittableList {
@@ -9,9 +9,9 @@ pub struct HittableList {
 }
 
 impl HittableList {
-    pub fn new() -> Self {
+    pub fn new(objects: Vec<Rc<dyn hittable::Hittable>>) -> Self {
         Self {
-            objects: Vec::new(),
+            objects
         }
     }
 
@@ -22,12 +22,12 @@ impl HittableList {
 
 impl Default for HittableList {
     fn default() -> Self {
-        Self::new()
+        Self::new(Vec::new())
     }
 }
 
 impl hittable::Hittable for HittableList {
-    fn hit(&self, r: &rays::Ray, ray_t: &interval::Interval) -> Option<hit_record::HitRecord> {
+    fn hit(&self, r: &ray::Ray, ray_t: &interval::Interval) -> Option<hit_record::HitRecord> {
         let mut closest_so_far = ray_t.max();
         let mut hit_anything = None;
 

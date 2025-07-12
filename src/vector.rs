@@ -42,6 +42,13 @@ impl std::ops::Mul<Vec3> for f64 {
     }
 }
 
+impl std::ops::Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3 { x: self.x * rhs.x, y: self.y * rhs.y, z: self.z * rhs.z }
+    }
+}
+
 impl std::ops::Div<f64> for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: f64) -> Vec3 {
@@ -119,4 +126,8 @@ pub fn random_in_unit_sphere() -> Vec3 {
             return p;
         }
     }
+}
+
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+    *v - 2.0 * dot(*v, *n) * *n
 }

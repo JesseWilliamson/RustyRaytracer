@@ -1,5 +1,5 @@
 use std::rc;
-use crate::{hit_record, hittable, interval, rays, vector, material};
+use crate::{hit_record, hittable, interval, ray, vector, material};
 
 pub struct Sphere {
     center: vector::Vec3,
@@ -14,7 +14,7 @@ impl Sphere {
 }
 
 impl hittable::Hittable for Sphere {
-    fn hit(&self, r: &rays::Ray, ray_t: &interval::Interval) -> Option<hit_record::HitRecord> {
+    fn hit(&self, r: &ray::Ray, ray_t: &interval::Interval) -> Option<hit_record::HitRecord> {
         let oc = self.center - r.origin();
         let a = r.direction().length_squared();
         let h = vector::dot(r.direction(), oc);

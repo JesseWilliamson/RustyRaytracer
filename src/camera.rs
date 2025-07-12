@@ -4,7 +4,7 @@ use indicatif::ProgressBar;
 use crate::hittable;
 use crate::hittable_list;
 use crate::interval;
-use crate::rays;
+use crate::ray;
 use crate::{vector, color, point};
 
 pub struct Camera {
@@ -51,15 +51,20 @@ impl Camera {
         }
     }
 
-    fn ray_color(r: &rays::Ray, world: &hittable_list::HittableList, depth: u32) -> color::Color {
+    fn ray_color(r: &ray::Ray, world: &hittable_list::HittableList, depth: u32) -> color::Color {
         if depth == 0 {
             return color::Color::new(0.0, 0.0, 0.0);
         }
         let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.001, f64::INFINITY));
         match hit_record {
             Some(rec) => {
-                let direction = vector::random_on_hemisphere(rec.normal);
-                0.5 * Camera::ray_color(&rays::Ray::new(rec.p, direction), world, depth - 1)
+                let mut scattered = ray::Ray::new(point::Point3::new(0.0, 0.0, 0.0), vector::Vec3::new(0.0, 0.0, 0.0));
+                let mut attenuation = color::Color::new(0.0, 0.0, 0.0);
+                if rec.material.scatter(r, &rec, &mut attenuation, &mut scattered) {
+                    Camera::ray_color(&scattered, world, depth - 1) * attenuation
+                } else {
+                    color::Color::new(0.0, 0.0, 0.0)
+                }
             },
             None => {
                 let unit_direction = vector::unit_vector(r.direction());
@@ -70,7 +75,7 @@ impl Camera {
         }
     }
 
-    fn get_ray(&self, i: i32, j: i32) -> rays::Ray {
+    fn get_ray(&self, i: i32, j: i32) -> ray::Ray {
         let offset = Self::sample_square();
         let pixel_sample = self.pixel00_loc
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
@@ -78,7 +83,7 @@ impl Camera {
         let ray_origin = self.center;
         let ray_direction = pixel_sample - ray_origin;
 
-        rays::Ray::new(ray_origin, ray_direction)
+        ray::Ray::new(ray_origin, ray_direction)
     }
 
     fn sample_square() -> vector::Vec3 {
