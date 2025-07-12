@@ -18,8 +18,8 @@ fn main() -> io::Result<()> {
     
     let material_ground = Rc::new(lambertian::Lambertian::new(color::Color::new(0.8, 0.8, 0.0)));
     let material_center = Rc::new(lambertian::Lambertian::new(color::Color::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(metal::Metal::new(color::Color::new(0.8, 0.8, 0.8)));
-    let material_right = Rc::new(metal::Metal::new(color::Color::new(0.8, 0.6, 0.2)));
+    let material_left = Rc::new(metal::Metal::new(color::Color::new(0.8, 0.8, 0.8), 0.3));
+    let material_right = Rc::new(metal::Metal::new(color::Color::new(0.8, 0.6, 0.2), 1.0));
     let world = hittable_list::HittableList::new(vec![
         Rc::new(sphere::Sphere::new(point::Point3::new(0.0, -100.5, -1.0), 100.0, material_ground.clone())) as Rc<dyn hittable::Hittable>,
         Rc::new(sphere::Sphere::new(point::Point3::new(0.0, 0.0, -1.0), 0.5, material_center.clone())) as Rc<dyn hittable::Hittable>,
