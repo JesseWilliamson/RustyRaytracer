@@ -5,12 +5,14 @@ use crate::hittable;
 use crate::hittable_list;
 use crate::interval;
 use crate::ray;
+use crate::utils;
 use crate::{vector, color, point};
 
 pub struct Camera {
     aspect_ratio: f64,
     image_width: i32,
     image_height: i32,
+    vertical_fov: f64,
     samples_per_pixel: i32,
     center: point::Point3,
     pixel00_loc: point::Point3,
@@ -19,10 +21,12 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(image_width: i32, aspect_ratio: f64, samples_per_pixel: i32) -> Self {
+    pub fn new(image_width: i32, aspect_ratio: f64, vertical_fov: f64, samples_per_pixel: i32) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as i32;
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = utils::degrees_to_radians(vertical_fov);
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * image_width as f64 / image_height as f64;
         let center = point::Point3::new(0.0, 0.0, 0.0);
 
@@ -43,6 +47,7 @@ impl Camera {
             aspect_ratio,
             image_width,
             image_height,
+            vertical_fov,
             samples_per_pixel,
             center,
             pixel00_loc,

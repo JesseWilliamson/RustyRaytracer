@@ -29,7 +29,7 @@ fn main() -> io::Result<()> {
         Rc::new(sphere::Sphere::new(point::Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())) as Rc<dyn hittable::Hittable>,
     ]);
 
-    let camera = Camera::new(400, 16.0 / 9.0, 100);
+    let camera = Camera::new(400, 16.0 / 9.0, 90.0, 100);
 
     camera.render(&world, &mut file)?;
     Ok(())
