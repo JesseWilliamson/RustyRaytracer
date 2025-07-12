@@ -22,7 +22,7 @@ impl Color {
         let g_byte = (255.999 * intensity.clamp(g)) as i32;
         let b_byte = (255.999 * intensity.clamp(b)) as i32;
 
-        write!(out, "{} {} {}\n", r_byte, g_byte, b_byte)
+        writeln!(out, "{} {} {}", r_byte, g_byte, b_byte)
     }
 }
 
