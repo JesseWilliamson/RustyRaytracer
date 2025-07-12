@@ -2,9 +2,10 @@ use crate::hit_record;
 use crate::hittable;
 use crate::interval;
 use crate::rays;
+use std::rc::Rc;
 
 pub struct HittableList {
-    objects: Vec<Box<dyn hittable::Hittable>>,
+    objects: Vec<Rc<dyn hittable::Hittable>>,
 }
 
 impl HittableList {
@@ -14,7 +15,7 @@ impl HittableList {
         }
     }
 
-    pub fn add(&mut self, object: Box<dyn hittable::Hittable>) {
+    pub fn add(&mut self, object: Rc<dyn hittable::Hittable>) {
         self.objects.push(object);
     }
 }

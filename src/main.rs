@@ -3,6 +3,7 @@ use raytracing_in_a_weekend_rust::{hittable_list, sphere, vector, color, point};
 use std::env;
 use std::fs::File;
 use std::io;
+use std::rc::Rc;
 
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -17,11 +18,11 @@ fn main() -> io::Result<()> {
 
     // World
     let mut world = hittable_list::HittableList::new();
-    world.add(Box::new(sphere::Sphere::new(
+    world.add(Rc::new(sphere::Sphere::new(
         point::Point3::new(0.0, 0.0, -1.0),
         0.5,
     )));
-    world.add(Box::new(sphere::Sphere::new(
+    world.add(Rc::new(sphere::Sphere::new(
         point::Point3::new(0.0, -100.5, -1.0),
         100.0,
     )));
