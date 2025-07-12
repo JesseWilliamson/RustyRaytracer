@@ -5,17 +5,17 @@ use crate::hittable;
 use crate::hittable_list;
 use crate::interval;
 use crate::rays;
-use crate::vectors;
+use crate::{vector, color, point};
 
 pub struct Camera {
     aspect_ratio: f64,
     image_width: i32,
     image_height: i32,
     samples_per_pixel: i32,
-    center: vectors::Point3,
-    pixel00_loc: vectors::Point3,
-    pixel_delta_u: vectors::Vec3,
-    pixel_delta_v: vectors::Vec3,
+    center: point::Point3,
+    pixel00_loc: point::Point3,
+    pixel_delta_u: vector::Vec3,
+    pixel_delta_v: vector::Vec3,
 }
 
 impl Camera {
@@ -24,16 +24,16 @@ impl Camera {
         let focal_length = 1.0;
         let viewport_height = 2.0;
         let viewport_width = viewport_height * image_width as f64 / image_height as f64;
-        let center = vectors::Point3::new(0.0, 0.0, 0.0);
+        let center = point::Point3::new(0.0, 0.0, 0.0);
 
-        let viewport_u = vectors::Vec3::new(viewport_width, 0.0, 0.0);
-        let viewport_v = vectors::Vec3::new(0.0, -viewport_height, 0.0);
+        let viewport_u = vector::Vec3::new(viewport_width, 0.0, 0.0);
+        let viewport_v = vector::Vec3::new(0.0, -viewport_height, 0.0);
 
         let pixel_delta_u = viewport_u / image_width as f64;
         let pixel_delta_v = viewport_v / image_height as f64;
 
         let viewport_upper_left = center
-            - vectors::Vec3::new(0.0, 0.0, focal_length)
+            - vector::Vec3::new(0.0, 0.0, focal_length)
             - viewport_u / 2.0
             - viewport_v / 2.0;
 
@@ -51,21 +51,21 @@ impl Camera {
         }
     }
 
-    fn ray_color(r: &rays::Ray, world: &hittable_list::HittableList, depth: u32) -> vectors::Color {
+    fn ray_color(r: &rays::Ray, world: &hittable_list::HittableList, depth: u32) -> color::Color {
         if depth == 0 {
-            return vectors::Color::new(0.0, 0.0, 0.0);
+            return color::Color::new(0.0, 0.0, 0.0);
         }
         let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.001, f64::INFINITY));
         match hit_record {
             Some(rec) => {
-                let direction = vectors::random_on_hemisphere(rec.normal);
+                let direction = vector::random_on_hemisphere(rec.normal);
                 0.5 * Camera::ray_color(&rays::Ray::new(rec.p, direction), world, depth - 1)
             },
             None => {
-                let unit_direction = vectors::unit_vector(r.direction());
+                let unit_direction = vector::unit_vector(r.direction());
                 let a = 0.5 * (unit_direction.y() + 1.0);
-                (1.0 - a) * vectors::Color::new(1.0, 1.0, 1.0)
-                    + vectors::Color::new(0.5, 0.7, 1.0) * a
+                (1.0 - a) * color::Color::new(1.0, 1.0, 1.0)
+                    + color::Color::new(0.5, 0.7, 1.0) * a
             }
         }
     }
@@ -81,11 +81,11 @@ impl Camera {
         rays::Ray::new(ray_origin, ray_direction)
     }
 
-    fn sample_square() -> vectors::Vec3 {
+    fn sample_square() -> vector::Vec3 {
         // Returns a vector to a random point in the [-.5, -.5], [+.5, +.5] unit square.
         let mut rng = rand::rng();
 
-        vectors::Vec3::new(
+        vector::Vec3::new(
             rng.random_range(-0.5..0.5),
             rng.random_range(-0.5..0.5),
             0.0,
@@ -104,7 +104,7 @@ impl Camera {
         for j in 0..self.image_height {
             bar.inc(1);
             for i in 0..self.image_width {
-                let mut pixel_color = vectors::Color::new(0.0, 0.0, 0.0);
+                let mut pixel_color = color::Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
                     pixel_color += Camera::ray_color(&r, world, max_depth);

@@ -1,12 +1,12 @@
-use crate::{hit_record, hittable, interval, rays, vectors};
+use crate::{hit_record, hittable, interval, rays, vector, color, point};
 
 pub struct Sphere {
-    center: vectors::Vec3,
+    center: vector::Vec3,
     radius: f64,
 }
 
 impl Sphere {
-    pub fn new(center: vectors::Vec3, radius: f64) -> Sphere {
+    pub fn new(center: vector::Vec3, radius: f64) -> Sphere {
         Sphere { center, radius }
     }
 }
@@ -15,7 +15,7 @@ impl hittable::Hittable for Sphere {
     fn hit(&self, r: &rays::Ray, ray_t: &interval::Interval) -> Option<hit_record::HitRecord> {
         let oc = self.center - r.origin();
         let a = r.direction().length_squared();
-        let h = vectors::dot(r.direction(), oc);
+        let h = vector::dot(r.direction(), oc);
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = h * h - a * c;
         if discriminant < 0.0 {

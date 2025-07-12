@@ -5,5 +5,7 @@ pub mod hittable_list;
 pub mod interval;
 pub mod rays;
 pub mod sphere;
-pub mod vectors;
 pub mod utils;
+pub mod vector;
+pub mod color;
+pub mod point;
