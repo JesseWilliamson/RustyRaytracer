@@ -1,7 +1,7 @@
-use std;
 use crate::utils;
-
+use std;
 #[derive(Debug, Clone, Copy, PartialEq)]
+
 pub struct Vec3 {
     x: f64,
     y: f64,
@@ -11,62 +11,96 @@ pub struct Vec3 {
 impl std::ops::Add<Vec3> for Vec3 {
     type Output = Vec3;
     fn add(self, rhs: Vec3) -> Vec3 {
-        Vec3 { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
     }
 }
 
 impl std::ops::AddAssign<Vec3> for Vec3 {
     fn add_assign(&mut self, rhs: Vec3) {
-        *self = Vec3 { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+        *self = Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
     }
 }
 
 impl std::ops::Sub<Vec3> for Vec3 {
     type Output = Vec3;
     fn sub(self, rhs: Vec3) -> Vec3 {
-        Vec3 { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
     }
 }
 
 impl std::ops::Mul<f64> for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: f64) -> Vec3 {
-        Vec3 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
+        Vec3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
     }
 }
 
 impl std::ops::Mul<Vec3> for f64 {
     type Output = Vec3;
     fn mul(self, rhs: Vec3) -> Vec3 {
-        Vec3 { x: self * rhs.x, y: self * rhs.y, z: self * rhs.z }
+        Vec3 {
+            x: self * rhs.x,
+            y: self * rhs.y,
+            z: self * rhs.z,
+        }
     }
 }
 
 impl std::ops::Mul<Vec3> for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: Vec3) -> Vec3 {
-        Vec3 { x: self.x * rhs.x, y: self.y * rhs.y, z: self.z * rhs.z }
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
     }
 }
 
 impl std::ops::Div<f64> for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: f64) -> Vec3 {
-        Vec3 { x: self.x / rhs, y: self.y / rhs, z: self.z / rhs }
+        Vec3 {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
     }
 }
 
 impl std::ops::Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Vec3 {
-        Vec3 { x: -self.x, y: -self.y, z: -self.z }
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }
 
+// Dot product of two vectors
 pub fn dot(a: Vec3, b: Vec3) -> f64 {
     a.x * b.x + a.y * b.y + a.z * b.z
 }
 
+// Cross product of two vectors
 pub fn cross(a: Vec3, b: Vec3) -> Vec3 {
     Vec3 {
         x: a.y * b.z - a.z * b.y,
@@ -79,11 +113,21 @@ impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
     }
-    pub fn x(&self) -> f64 { self.x }
-    pub fn y(&self) -> f64 { self.y }
-    pub fn z(&self) -> f64 { self.z }
-    pub fn length_squared(&self) -> f64 { self.x * self.x + self.y * self.y + self.z * self.z }
-    pub fn length(&self) -> f64 { self.length_squared().sqrt() }
+    pub fn x(&self) -> f64 {
+        self.x
+    }
+    pub fn y(&self) -> f64 {
+        self.y
+    }
+    pub fn z(&self) -> f64 {
+        self.z
+    }
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
+    }
     pub fn near_zero(&self) -> bool {
         let s = 1e-8;
         self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
@@ -116,7 +160,11 @@ pub fn random_unit_vector() -> Vec3 {
 
 pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
     let on_unit_sphere = random_unit_vector();
-    if dot(on_unit_sphere, normal) > 0.0 { on_unit_sphere } else { -on_unit_sphere }
+    if dot(on_unit_sphere, normal) > 0.0 {
+        on_unit_sphere
+    } else {
+        -on_unit_sphere
+    }
 }
 
 pub fn random_in_unit_sphere() -> Vec3 {
@@ -128,10 +176,13 @@ pub fn random_in_unit_sphere() -> Vec3 {
     }
 }
 
+// Reflect vector v around normal n
 pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
     *v - 2.0 * dot(*v, *n) * *n
 }
 
+// Refract vector uv through surface with normal n and ratio etai_over_etat
+// Behaviour described by Snell's Law
 pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
     let cos_theta = dot(-*uv, *n).min(1.0);
     let r_out_perp = etai_over_etat * (*uv + cos_theta * *n);

@@ -1,12 +1,12 @@
 use crate::{color, material, ray, utils, vector};
 
 pub struct Dielectric {
-    // The ratio of the refractive index of the material to the refractive index of the enclosing media
-    refractive_index: f64
+    refractive_index: f64,
 }
 
 impl Dielectric {
     pub fn new(refractive_index: f64) -> Dielectric {
+        // The ratio of the refractive index of the material to the refractive index of the enclosing media
         Dielectric { refractive_index }
     }
 
@@ -15,28 +15,28 @@ impl Dielectric {
         r_in: &ray::Ray,
         rec: &crate::hit_record::HitRecord,
         attenuation: &mut color::Color,
-        scattered: &mut ray::Ray
+        scattered: &mut ray::Ray,
     ) -> bool {
         *attenuation = color::Color::new(1.0, 1.0, 1.0);
-        let ri = if rec.front_face {
+        let refractive_index = if rec.front_face() {
             1.0 / self.refractive_index
         } else {
             self.refractive_index
         };
 
         let unit_direction = vector::unit_vector(r_in.direction());
-        let cos_theta = vector::dot(-unit_direction, rec.normal).min(1.0);
+        let cos_theta = vector::dot(-unit_direction, *rec.normal()).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let cannot_refract = refractive_index * sin_theta > 1.0;
 
-        let cannot_refract = ri * sin_theta > 1.0;
+        let direction =
+            if cannot_refract || schlick_reflectance(cos_theta, refractive_index) > utils::random_f64() {
+                vector::reflect(&unit_direction, rec.normal())
+            } else {
+                vector::refract(&unit_direction, rec.normal(), refractive_index)
+            };
 
-        let direction = if cannot_refract || schlick_reflectance(cos_theta, ri) > utils::random_f64() {
-            vector::reflect(&unit_direction, &rec.normal)
-        } else {
-            vector::refract(&unit_direction, &rec.normal, ri)
-        };
-
-        *scattered = ray::Ray::new(rec.p, direction);
+        *scattered = ray::Ray::new(*rec.p(), direction);
         true
     }
 }
@@ -53,7 +53,7 @@ impl material::Material for Dielectric {
         r_in: &crate::ray::Ray,
         rec: &crate::hit_record::HitRecord,
         attenuation: &mut color::Color,
-        scattered: &mut crate::ray::Ray
+        scattered: &mut crate::ray::Ray,
     ) -> bool {
         self.scatter(r_in, rec, attenuation, scattered)
     }

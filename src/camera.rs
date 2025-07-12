@@ -1,11 +1,5 @@
+use crate::{color, point, vector, utils, hittable_list, hittable, interval, ray};
 use indicatif::ProgressBar;
-
-use crate::hittable;
-use crate::hittable_list;
-use crate::interval;
-use crate::ray;
-use crate::utils;
-use crate::{vector, color, point};
 
 #[derive(Debug, Clone)]
 pub struct Camera {
@@ -13,8 +7,6 @@ pub struct Camera {
     image_height: i32,
     samples_per_pixel: i32,
     max_depth: u32,
-
-    // Derived
     u: vector::Vec3,
     v: vector::Vec3,
     center: point::Point3,
@@ -25,7 +17,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    /// Internal constructor, prefer using CameraBuilder.
+    // Set up the camera coordinate system and image plane
     fn new(
         image_width: i32,
         aspect_ratio: f64,
@@ -39,30 +31,26 @@ impl Camera {
         focus_dist: f64,
     ) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as i32;
-        let focal_length = focus_dist; // Use focus_dist for depth of field
+        let focal_length = focus_dist;
         let theta = utils::degrees_to_radians(vertical_fov);
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * image_width as f64 / image_height as f64;
-        let center = look_from;
 
+        let center = look_from;
+        // Camera basis vectors: w = view direction, u = right, v = up
         let w = vector::unit_vector(look_from - look_at);
         let u = vector::unit_vector(vector::cross(vup, w));
         let v = vector::cross(w, u);
 
         let viewport_u = u * viewport_width;
         let viewport_v = -v * viewport_height;
-
         let pixel_delta_u = viewport_u / image_width as f64;
         let pixel_delta_v = viewport_v / image_height as f64;
-
-        let viewport_upper_left = center
-            - w * focal_length
-            - viewport_u / 2.0
-            - viewport_v / 2.0;
-
+        let viewport_upper_left = center - w * focal_length - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
 
+        // Lens radius for defocus blur
         let lens_radius = (defocus_angle.to_radians() / 2.0).tan() * focus_dist;
 
         Camera {
@@ -80,44 +68,57 @@ impl Camera {
         }
     }
 
-    fn ray_color(r: &ray::Ray, world: &hittable_list::HittableList, depth: u32) -> color::Color {
-        if depth == 0 {
+    fn ray_color(
+        ray: &ray::Ray,
+        world: &hittable_list::HittableList,
+        remaining_depth: u32,
+    ) -> color::Color {
+        // Background gradient constants (must be local variables, not const)
+        let background_top_color = color::Color::new(0.5, 0.7, 1.0);
+        let background_bottom_color = color::Color::new(1.0, 1.0, 1.0);
+        let blend_factor_scale: f64 = 0.5;
+        let blend_factor_offset: f64 = 1.0;
+        if remaining_depth == 0 {
             return color::Color::new(0.0, 0.0, 0.0);
         }
-        let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.001, f64::INFINITY));
+        let hit_record =
+            hittable::Hittable::hit(world, ray, &interval::Interval::new(0.001, f64::INFINITY));
         match hit_record {
-            Some(rec) => {
-                let mut scattered = ray::Ray::new(point::Point3::new(0.0, 0.0, 0.0), vector::Vec3::new(0.0, 0.0, 0.0));
+            Some(record) => {
+                let mut scattered_ray = ray::Ray::new(
+                    point::Point3::new(0.0, 0.0, 0.0),
+                    vector::Vec3::new(0.0, 0.0, 0.0),
+                );
                 let mut attenuation = color::Color::new(0.0, 0.0, 0.0);
-                if rec.material.scatter(r, &rec, &mut attenuation, &mut scattered) {
-                    Camera::ray_color(&scattered, world, depth - 1) * attenuation
+                if record
+                    .material()
+                    .scatter(ray, &record, &mut attenuation, &mut scattered_ray)
+                {
+                    Camera::ray_color(&scattered_ray, world, remaining_depth - 1) * attenuation
                 } else {
                     color::Color::new(0.0, 0.0, 0.0)
                 }
-            },
+            }
             None => {
-                let unit_direction = vector::unit_vector(r.direction());
-                let a = 0.5 * (unit_direction.y() + 1.0);
-                (1.0 - a) * color::Color::new(1.0, 1.0, 1.0)
-                    + color::Color::new(0.5, 0.7, 1.0) * a
+                let unit_direction = vector::unit_vector(ray.direction());
+                let blend_factor = blend_factor_scale * (unit_direction.y() + blend_factor_offset);
+                background_bottom_color * (1.0 - blend_factor) + background_top_color * blend_factor
             }
         }
     }
 
+    // Generate a ray through pixel (i, j), with lens sampling for depth of field
     fn get_ray(&self, i: i32, j: i32) -> ray::Ray {
-        // Random point in pixel
         let offset = Self::sample_square();
         let pixel_sample = self.pixel00_loc
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
             + ((j as f64 + offset.y()) * self.pixel_delta_v);
 
-        // Depth of field: sample point on lens
+        // Defocus blur: sample point on lens
         let rd = self.lens_radius * Self::random_in_unit_disk();
         let offset = self.u * rd.x() + self.v * rd.y();
-
         let ray_origin = self.center + offset;
         let ray_direction = pixel_sample - ray_origin;
-
         ray::Ray::new(ray_origin, ray_direction)
     }
 
@@ -139,11 +140,7 @@ impl Camera {
     fn sample_square() -> vector::Vec3 {
         use rand::Rng;
         let mut rng = rand::rng();
-        vector::Vec3::new(
-            rng.random_range(0.0..1.0),
-            rng.random_range(0.0..1.0),
-            0.0,
-        )
+        vector::Vec3::new(rng.random_range(0.0..1.0), rng.random_range(0.0..1.0), 0.0)
     }
 
     pub fn render<W: std::io::Write>(
@@ -152,7 +149,6 @@ impl Camera {
         out: &mut W,
     ) -> Result<(), std::io::Error> {
         out.write_all(format!("P3\n{} {}\n255\n", self.image_width, self.image_height).as_bytes())?;
-
         let bar = ProgressBar::new(self.image_height as u64);
         let max_depth = self.max_depth;
         for j in 0..self.image_height {
