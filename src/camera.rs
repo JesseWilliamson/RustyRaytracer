@@ -55,7 +55,7 @@ impl Camera {
         if depth == 0 {
             return vectors::Color::new(0.0, 0.0, 0.0);
         }
-        let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.0, f64::INFINITY));
+        let hit_record = hittable::Hittable::hit(world, r, &interval::Interval::new(0.001, f64::INFINITY));
         match hit_record {
             Some(rec) => {
                 let direction = vectors::random_on_hemisphere(rec.normal);
