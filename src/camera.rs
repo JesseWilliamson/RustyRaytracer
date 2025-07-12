@@ -25,12 +25,26 @@ pub struct Camera {
     pixel00_loc: point::Point3,
     pixel_delta_u: vector::Vec3,
     pixel_delta_v: vector::Vec3,
+    defocus_angle: f64,
+    focus_dist: f64,
+    lens_radius: f64,
 }
 
 impl Camera {
-    pub fn new(image_width: i32, aspect_ratio: f64, vertical_fov: f64, look_from: point::Point3, look_at: point::Point3, vup: vector::Vec3, samples_per_pixel: i32, max_depth: u32) -> Self {
+    pub fn new(
+        image_width: i32,
+        aspect_ratio: f64,
+        vertical_fov: f64,
+        look_from: point::Point3,
+        look_at: point::Point3,
+        vup: vector::Vec3,
+        samples_per_pixel: i32,
+        max_depth: u32,
+        defocus_angle: f64,
+        focus_dist: f64,
+    ) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as i32;
-        let focal_length = (look_from - look_at).length();
+        let focal_length = focus_dist; // Use focus_dist for depth of field
         let theta = utils::degrees_to_radians(vertical_fov);
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h * focal_length;
@@ -54,6 +68,8 @@ impl Camera {
 
         let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
 
+        let lens_radius = (defocus_angle.to_radians() / 2.0).tan() * focus_dist;
+
         Camera {
             aspect_ratio,
             image_width,
@@ -71,6 +87,9 @@ impl Camera {
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
+            defocus_angle,
+            focus_dist,
+            lens_radius,
         }
     }
 
@@ -99,14 +118,36 @@ impl Camera {
     }
 
     fn get_ray(&self, i: i32, j: i32) -> ray::Ray {
+        // Random point in pixel
         let offset = Self::sample_square();
         let pixel_sample = self.pixel00_loc
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
             + ((j as f64 + offset.y()) * self.pixel_delta_v);
-        let ray_origin = self.center;
+
+        // Depth of field: sample point on lens
+        let rd = self.lens_radius * Self::random_in_unit_disk();
+        let offset = self.u * rd.x() + self.v * rd.y();
+
+        let ray_origin = self.center + offset;
         let ray_direction = pixel_sample - ray_origin;
 
         ray::Ray::new(ray_origin, ray_direction)
+    }
+
+    /// Returns a random point in the unit disk (for lens sampling)
+    fn random_in_unit_disk() -> vector::Vec3 {
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        loop {
+            let p = vector::Vec3::new(
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0),
+                0.0,
+            );
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
     }
 
     /// Returns a vector to a random point in the [0, 1) x [0, 1) unit square.
